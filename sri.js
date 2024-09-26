@@ -56,12 +56,13 @@ async function uploadFileToDrive(file) {
 // OAuth 2.0 authentication
 function authenticate() {
     const clientId = "998766543441-d68nm2fi1ovc4433fob2fr14ni8vnhmb.apps.googleusercontent.com"; // Your Google Client ID
-    const redirectUri = window.location.origin;
+    const redirectUri = "https://testgoogle-drive.vercel.app"; // Ubah ini sesuai dengan redirect URI yang sudah didaftarkan di Google Cloud Console
     const scope = "https://www.googleapis.com/auth/drive.file";
     const authUrl = `https://accounts.google.com/o/oauth2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&response_type=token`;
 
     window.location.href = authUrl;
 }
+
 
 // Handle the access token from the URL when the user is redirected back after authentication
 function handleAuthToken() {
