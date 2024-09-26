@@ -2,7 +2,7 @@ let accessToken = ""; // Store the OAuth 2.0 access token
 
 // URL for Google Drive API to upload files
 const uploadUrl = "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart";
-const folderId = "1iE_NirOMcTjCB88Uzwf32vObjwRPlg1u"; // Your Google Drive folder ID
+const folderId = "1lkq3UdLDd9-aS8J7WrPUCkyJmLscB3HQ"; // Your Google Drive folder ID
 
 document.getElementById("uploadButton").addEventListener("click", async () => {
     console.log("Upload button clicked");
