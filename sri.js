@@ -1,16 +1,12 @@
-let accessToken = ""; // Store the OAuth 2.0 access token
+let accessToken = ""; 
 
-// URL for Google Drive API to upload files
 const uploadUrl = "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart";
-const folderId = "1lkq3UdLDd9-aS8J7WrPUCkyJmLscB3HQ"; // Your Google Drive folder ID
+const folderId = "1lkq3UdLDd9-aS8J7WrPUCkyJmLscB3HQ"; 
 
 document.getElementById("uploadButton").addEventListener("click", async () => {
-    console.log("Upload button clicked");
     if (!accessToken) {
-        console.log("No access token, starting authentication");
-        authenticate(); // Only call authenticate here
+        authenticate(); 
     } else {
-        console.log("Access token exists, proceeding with upload");
         const fileInput = document.getElementById("fileUpload");
         const file = fileInput.files[0];
         if (file) {
@@ -18,7 +14,7 @@ document.getElementById("uploadButton").addEventListener("click", async () => {
                 await uploadFileToDrive(file);
             } catch (error) {
                 console.error("File upload failed:", error);
-                alert("An error occurred during file upload. Please try again.");
+                alert("Error uploading file. Please try again.");
             }
         } else {
             alert("Please select a file.");
@@ -26,7 +22,6 @@ document.getElementById("uploadButton").addEventListener("click", async () => {
     }
 });
 
-// Function to upload the file to Google Drive
 async function uploadFileToDrive(file) {
     const metadata = {
         name: file.name,
@@ -51,30 +46,27 @@ async function uploadFileToDrive(file) {
     const data = await response.json();
     console.log("File uploaded successfully:", data);
     alert("File uploaded successfully!");
+    // Lakukan update izin di sini jika diperlukan
 }
 
-// OAuth 2.0 authentication
 function authenticate() {
-    const clientId = "21812121373-ehtg2sccmgirt697mtmu37kmcs0dgs9c.apps.googleusercontent.com"; // Your Google Client ID
-    const redirectUri = "https://testgoogle-drive.vercel.app"; // Ubah ini sesuai dengan redirect URI yang sudah didaftarkan di Google Cloud Console
+    const clientId = "21812121373-ehtg2sccmgirt697mtmu37kmcs0dgs9c.apps.googleusercontent.com"; 
+    const redirectUri = "https://testgoogle-drive.vercel.app"; 
     const scope = "https://www.googleapis.com/auth/drive.file";
     const authUrl = `https://accounts.google.com/o/oauth2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&response_type=token`;
 
     window.location.href = authUrl;
 }
 
-
-// Handle the access token from the URL when the user is redirected back after authentication
 function handleAuthToken() {
     const params = new URLSearchParams(window.location.hash.replace("#", ""));
     if (params.has("access_token")) {
         accessToken = params.get("access_token");
         console.log("Access Token found:", accessToken);
-        window.history.pushState({}, document.title, window.location.pathname); // Clear token from URL
+        window.history.pushState({}, document.title, window.location.pathname); 
     }
 }
 
-// Check for token if redirected back from authentication
 window.onload = function () {
     handleAuthToken();
 };
