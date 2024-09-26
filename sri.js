@@ -1,71 +1,82 @@
-let accessToken = "";
+script JS :
+let accessToken = ""; // Variable to store the OAuth 2.0 access token
 
-const uploadUrl = "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart";
-const folderId = "1lkq3UdLDd9-aS8J7WrPUCkyJmLscB3HQ";
+// URL for Google Drive API to upload files
+const uploadUrl =
+  "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart";
+const folderId = "1iE_NirOMcTjCB88Uzwf32vObjwRPlg1u"; // Folder ID from your Google Drive
 
+// Event listener for upload button
 document.getElementById("uploadButton").addEventListener("click", async () => {
-    if (!accessToken) {
-        authenticate();
-    } else {
-        const fileInput = document.getElementById("fileUpload");
-        const file = fileInput.files[0];
-        if (file) {
-            try {
-                await uploadFileToDrive(file);
-            } catch (error) {
-                console.error("File upload failed:", error);
-                alert(`Error uploading file: ${error.message}. Please try again.`);
-            }
-        } else {
-            alert("Please select a file.");
-        }
+  const fileInput = document.getElementById("fileUpload"); // Get file input element
+  const file = fileInput.files[0]; // Get the selected file
+  if (file) {
+    try {
+      await uploadFileToDrive(file); // Call the function to upload the file
+    } catch (error) {
+      console.error("File upload failed:", error); // Log any error
+      alert("An error occurred during file upload. Please try again."); // Display error message to the user
     }
+  } else {
+    // If no file is selected, show an alert
+    alert("Please select a file.");
+  }
 });
 
+// Function to upload file to Google Drive
 async function uploadFileToDrive(file) {
-    const metadata = {
-        name: file.name,
-        parents: [folderId],
-        mimeType: file.type,
-    };
+  // Metadata for the file upload, including name, type, and parent folder
+  const metadata = {
+    name: file.name, // File name on Google Drive
+    parents: [folderId], // Folder ID where the file will be uploaded
+    mimeType: file.type, // MIME type of the file (e.g., image/jpeg, application/pdf)
+  };
 
-    const formData = new FormData();
-    formData.append("metadata", new Blob([JSON.stringify(metadata)], { type: "application/json" }));
-    formData.append("file", file);
+  // Create form data that will be sent to Google Drive
+  const formData = new FormData();
+  formData.append(
+    "metadata",
+    new Blob([JSON.stringify(metadata)], { type: "application/json" })
+  );
+  formData.append("file", file);
 
-    const response = await fetch(uploadUrl, {
-        method: "POST",
-        headers: new Headers({ Authorization: "Bearer " + accessToken }),
-        body: formData,
-    });
+  // Send the POST request to upload the file
+  const response = await fetch(uploadUrl, {
+    method: "POST",
+    headers: new Headers({ Authorization: "Bearer " + accessToken }), // Include the access token for authorization
+    body: formData, // Send the form data
+  });
 
-    if (!response.ok) {
-        throw new Error(`File upload failed. Status: ${response.status}`);
-    }
+  if (!response.ok) {
+    throw new Error("File upload failed. Status: " + response.status);
+  }
 
-    const data = await response.json();
-    console.log("File uploaded successfully:", data);
-    alert("File uploaded successfully!");
+  const data = await response.json(); // Parse the response as JSON
+  console.log("File uploaded successfully:", data); // Log the response data
+  alert("File uploaded to Google Drive successfully!"); // Show a success message to the user
 }
 
+// OAuth 2.0 authentication function
 function authenticate() {
-    const clientId = "21812121373-ehtg2sccmgirt697mtmu37kmcs0dgs9c.apps.googleusercontent.com";
-    const redirectUri = "https://testgoogle-drive.vercel.app";
-    const scope = "https://www.googleapis.com/auth/drive.file";
-    const authUrl = `https://accounts.google.com/o/oauth2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&response_type=token`;
+  const clientId =
+    "998766543441-d68nm2fi1ovc4433fob2fr14ni8vnhmb.apps.googleusercontent.com"; // Replace with your Google OAuth 2.0 Client ID
+  const redirectUri = window.location.origin; // The redirect URI, usually the current page
+  const scope = "https://www.googleapis.com/auth/drive.file"; // The scope to access Google Drive
+  const authUrl = `https://accounts.google.com/o/oauth2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&response_type=token`;
 
-    window.location.href = authUrl;
+  // Redirect the user to Google login page
+  window.location.href = authUrl;
 }
 
-function handleAuthToken() {
-    const params = new URLSearchParams(window.location.hash.replace("#", ""));
-    if (params.has("access_token")) {
-        accessToken = params.get("access_token");
-        console.log("Access Token found:", accessToken);
-        window.history.pushState({}, document.title, window.location.pathname);
-    }
-}
-
+// Function to run on page load
 window.onload = function () {
-    handleAuthToken();
+  const params = new URLSearchParams(window.location.hash.replace("#", ""));
+  if (params.has("access_token")) {
+    // If an access token is present in the URL, store it
+    accessToken = params.get("access_token");
+    console.log("Access Token:", accessToken); // Log the access token
+  } else {
+    // If no access token, trigger authentication
+    authenticate();
+  }
 };
