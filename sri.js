@@ -1,4 +1,4 @@
-script JS :
+
 let accessToken = ""; // Variable to store the OAuth 2.0 access token
 
 // URL for Google Drive API to upload files
