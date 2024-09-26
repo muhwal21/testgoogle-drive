@@ -4,7 +4,7 @@ let accessToken = ""; // Variable to store the OAuth 2.0 access token
 // URL for Google Drive API to upload files
 const uploadUrl =
   "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart";
-const folderId = "1iE_NirOMcTjCB88Uzwf32vObjwRPlg1u"; // Folder ID from your Google Drive
+const folderId = "1lkq3UdLDd9-aS8J7WrPUCkyJmLscB3HQ"; // Folder ID from your Google Drive
 
 // Event listener for upload button
 document.getElementById("uploadButton").addEventListener("click", async () => {
@@ -59,7 +59,7 @@ async function uploadFileToDrive(file) {
 // OAuth 2.0 authentication function
 function authenticate() {
   const clientId =
-    "998766543441-d68nm2fi1ovc4433fob2fr14ni8vnhmb.apps.googleusercontent.com"; // Replace with your Google OAuth 2.0 Client ID
+    "21812121373-ehtg2sccmgirt697mtmu37kmcs0dgs9c.apps.googleusercontent.com"; // Replace with your Google OAuth 2.0 Client ID
   const redirectUri = window.location.origin; // The redirect URI, usually the current page
   const scope = "https://www.googleapis.com/auth/drive.file"; // The scope to access Google Drive
   const authUrl = `https://accounts.google.com/o/oauth2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&response_type=token`;
