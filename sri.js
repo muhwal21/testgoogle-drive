@@ -1,81 +1,45 @@
-let accessToken = ""; // Variable to store the OAuth 2.0 access token
+const { google } = require('googleapis');
 
-// URL for Google Drive API to upload files
-const uploadUrl =
-  "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart";
-const folderId = "1iE_NirOMcTjCB88Uzwf32vObjwRPlg1u"; // Folder ID from your Google Drive
+// Gantikan dengan informasi Service Account Anda
+const SERVICE_ACCOUNT_EMAIL = "dialogika@dialogika-upload-file.iam.gserviceaccount.com";
+const PRIVATE_KEY = "-----BEGIN PRIVATE KEY-----\nYOUR_PRIVATE_KEY\n-----END PRIVATE KEY-----\n";
+const FOLDER_ID = "YOUR_FOLDER_ID"; // Ganti dengan ID folder di Google Drive
 
-// Event listener for upload button
-document.getElementById("uploadButton").addEventListener("click", async () => {
-  const fileInput = document.getElementById("fileUpload"); // Get file input element
-  const file = fileInput.files[0]; // Get the selected file
-  if (file) {
-    try {
-      await uploadFileToDrive(file); // Call the function to upload the file
-    } catch (error) {
-      console.error("File upload failed:", error); // Log any error
-      alert("An error occurred during file upload. Please try again."); // Display error message to the user
-    }
-  } else {
-    // If no file is selected, show an alert
-    alert("Please select a file.");
-  }
-});
+// Inisialisasi JWT client
+const jwtClient = new google.auth.JWT(
+  SERVICE_ACCOUNT_EMAIL,
+  null,
+  PRIVATE_KEY,
+  ['https://www.googleapis.com/auth/drive.file']
+);
 
-// Function to upload file to Google Drive
-async function uploadFileToDrive(file) {
-  // Metadata for the file upload, including name, type, and parent folder
-  const metadata = {
-    name: file.name, // File name on Google Drive
-    parents: [folderId], // Folder ID where the file will be uploaded
-    mimeType: file.type, // MIME type of the file (e.g., image/jpeg, application/pdf)
+// Fungsi untuk mengupload file
+async function uploadFile(filePath, fileName) {
+  await jwtClient.authorize();
+
+  const drive = google.drive({ version: 'v3', auth: jwtClient });
+  
+  const fileMetadata = {
+    name: fileName,
+    parents: [FOLDER_ID]
   };
-
-  // Create form data that will be sent to Google Drive
-  const formData = new FormData();
-  formData.append(
-    "metadata",
-    new Blob([JSON.stringify(metadata)], { type: "application/json" })
-  );
-  formData.append("file", file);
-
-  // Send the POST request to upload the file
-  const response = await fetch(uploadUrl, {
-    method: "POST",
-    headers: new Headers({ Authorization: "Bearer " + accessToken }), // Include the access token for authorization
-    body: formData, // Send the form data
-  });
-
-  if (!response.ok) {
-    throw new Error("File upload failed. Status: " + response.status);
+  
+  const media = {
+    mimeType: 'application/octet-stream', // Ganti sesuai dengan jenis file yang diupload
+    body: fs.createReadStream(filePath)
+  };
+  
+  try {
+    const response = await drive.files.create({
+      resource: fileMetadata,
+      media: media,
+      fields: 'id'
+    });
+    console.log('File uploaded successfully, File ID:', response.data.id);
+  } catch (error) {
+    console.error('Error uploading file:', error);
   }
-
-  const data = await response.json(); // Parse the response as JSON
-  console.log("File uploaded successfully:", data); // Log the response data
-  alert("File uploaded to Google Drive successfully!"); // Show a success message to the user
 }
 
-// OAuth 2.0 authentication function
-function authenticate() {
-  const clientId =
-    "998766543441-d68nm2fi1ovc4433fob2fr14ni8vnhmb.apps.googleusercontent.com"; // Replace with your Google OAuth 2.0 Client ID
-  const redirectUri = window.location.origin; // The redirect URI, usually the current page
-  const scope = "https://www.googleapis.com/auth/drive.file"; // The scope to access Google Drive
-  const authUrl = `https://accounts.google.com/o/oauth2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&response_type=token`;
-
-  // Redirect the user to Google login page
-  window.location.href = authUrl;
-}
-
-// Function to run on page load
-window.onload = function () {
-  const params = new URLSearchParams(window.location.hash.replace("#", ""));
-  if (params.has("access_token")) {
-    // If an access token is present in the URL, store it
-    accessToken = params.get("access_token");
-    console.log("Access Token:", accessToken); // Log the access token
-  } else {
-    // If no access token, trigger authentication
-    authenticate();
-  }
-};
+// Panggil fungsi upload
+uploadFile('path/to/your/file.txt', 'file.txt');
